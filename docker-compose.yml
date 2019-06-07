@@ -1,0 +1,86 @@
+version: "3.7"
+
+services:
+  mongo-primary:
+    container_name: ast-mongo-primary
+    image: ast_mongo:latest
+    hostname: mongo-primary
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ast_starter
+      MONGO_INITDB_ROOT_USERNAME: digz
+      MONGO_INITDB_ROOT_PASSWORD: ast_digz
+      MONGO_DATA_DIR: /data/db_p
+      MONGO_LOG_DIR: /data/log_p
+      # IMPORT_FROM_VOLUME: 'true' # not needed
+    ports:
+      - 30000:27017
+    volumes:
+      - ./mongo-scripts:/docker-entrypoint-initdb.d:ro
+      - ./.mongodb/data:/data/db
+      - ./.mongodb/log:/data/log
+      # windows only
+      # - mongodata_p:/data/db_p
+      # - mongolog_p:/data/log_p
+    networks:
+      - ast_mongo_cluster
+    command: --bind_ip_all --keyFile /data/ast_mongo.key --replSet ast-replica-set --enableMajorityReadConcern false #--port 30000
+
+  mongo-arbiter:
+    container_name: ast-mongo-arbiter
+    image: ast_mongo:latest
+    hostname: mongo-arbiter
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ast_starter
+      MONGO_INITDB_ROOT_USERNAME: digz
+      MONGO_INITDB_ROOT_PASSWORD: ast_digz
+      MONGO_DATA_DIR: /data/db_a
+      MONGO_LOG_DIR: /data/log_a
+    ports:
+      - 30001:27017
+    volumes:
+      - ./.mongodb/arbiter-data:/data/db
+      - ./.mongodb/arbiter-log:/data/log
+      # windows only
+      # - mongodata_a:/data/db_a
+      # - mongolog_a:/data/log_a
+    networks:
+      - ast_mongo_cluster
+    command: --bind_ip_all --keyFile /data/ast_mongo.key --replSet ast-replica-set --enableMajorityReadConcern false #--port 30000
+
+  mongo-secondary:
+    container_name: ast-mongo-secondary
+    image: ast_mongo:latest
+    hostname: mongo-secondary
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: ast_starter
+      MONGO_INITDB_ROOT_USERNAME: digz
+      MONGO_INITDB_ROOT_PASSWORD: ast_digz
+      MONGO_DATA_DIR: /data/db_s
+      MONGO_LOG_DIR: /data/log_s
+    ports:
+      - 30002:27017
+    volumes:
+      - ./.mongodb/secondary-data:/data/db
+      - ./.mongodb/secondary-log:/data/log
+      # windows only
+      # - mongodata_s:/data/db_s
+      # - mongolog_s:/data/log_s
+    networks:
+      - ast_mongo_cluster
+    command: --bind_ip_all --keyFile /data/ast_mongo.key --replSet ast-replica-set --enableMajorityReadConcern false #--port 30000
+
+networks:
+  ast_mongo_cluster:
+    driver: bridge
+
+# windows only
+# volumes:
+#   mongodata_p:
+#   mongolog_p:
+#   mongodata_a:
+#   mongolog_a:
+#   mongodata_s:
+#   mongolog_s:
