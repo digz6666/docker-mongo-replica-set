@@ -1,20 +1,22 @@
-# build image
+# Mongo replica set using docker (with 1 primary, 1 secondary and 1 arbiter node)
+
+## build image
 docker build -t ast_mongo .
 
-# run
+## run
 docker-compose up
 
-# list containers, images, volumes and networks
+## list containers, images, volumes and networks
 docker container ls
 docker image ls
 docker volume ls
 docker network ls
 
-# info
+## info
 docker info
 
-# cleanup
+## cleanup
 docker system prune
 
-# get ip address of container
+## get ip address of container
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ast-mongo-repset
